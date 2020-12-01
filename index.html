@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip and Match</title>
+
+    <style>
+        body {
+            background-color: lightgray;
+        }
+
+        #deck {
+            margin: 0 auto;
+            width: 700px;
+        }
+
+        .card {
+            margin: 5px;
+            float: left;
+        }
+    </style>
+
+    <script src="src/jquery.min.js"></script>
+    <script src="src/index.js"></script>
+</head>
+
+<body>
+    <div id="deck"></div>
+
+    <script>
+        // preload all poker pics
+        let images = new Array();
+        cards.forEach(card => {
+            let picName = "poker/" + card.getSuit() + card.getNum() + ".png";
+            let img = new Image();
+            img.src = picName;
+            images.push(img);
+        });
+
+        // record variable
+        let flipedCount = 0;
+        let firstObj = null;
+        let first = -1;
+        $(function() {
+            cards.forEach(function(card, index) {
+                if (card.getFaceUp()) {
+                    $('#deck').append('<div class="card" id="' + index + '"><img src="poker/' + card.getSuit() + card.getNum() + '.png"></div>');
+                } else {
+                    $('#deck').append('<div class="card" id="' + index + '"><img src="poker/Back.png"></div>');
+                }
+            });
+
+            $('.card').on('click', function () {
+                let index = $(this).attr('id');
+                if (cards[index].getFaceUp()) {
+                    return;
+                }
+                cards[index].flip();
+                changeCardPic(this, index);
+                flipedCount++;
+                if (flipedCount == 1) {
+                    firstObj = this;
+                    first = index;
+                } else if (flipedCount == 2) {
+                    $('#deck').children().css('pointer-events', 'none');
+                    flipedCount = 0;
+                    let firstNum = cards[first].getNum();
+                    // console.log(firstNum);
+                    let secondNum = cards[index].getNum();
+                    // console.log(secondNum);
+                    if (firstNum != secondNum) {
+                        let obj = this;
+                        setTimeout(function() {
+                            cards[first].flip();
+                            changeCardPic(firstObj, first);
+                            cards[index].flip();
+                            changeCardPic(obj, index);
+                            first = -1;
+                            $('#deck').children().css('pointer-events', 'auto');
+                        }, 1500);
+                    } else {
+                        $('#deck').children().css('pointer-events', 'auto');
+                    }
+
+                    if (cards.every(card => card.getFaceUp())) {
+                        alert("WDNMD真就赢了啊?");
+                        location.reload();
+                    }
+                }
+            });
+        });
+
+        function changeCardPic(obj, index) {
+            let card = cards[index];
+            if (card.getFaceUp()) {
+                $(obj).html('<img src="poker/' + card.getSuit() + card.getNum() + '.png">');
+            } else {
+                $(obj).html('<img src="poker/Back.png">');
+            }
+        }
+    </script>
+</body>
+
+</html>
